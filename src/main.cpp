@@ -8,7 +8,7 @@ void setup() {
   Serial.begin(115200);
   dht_init();
   display_init();
-
+  pinMode(13, OUTPUT);
 }
 
 void loop() {
