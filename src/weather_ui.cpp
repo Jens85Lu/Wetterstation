@@ -1,9 +1,5 @@
 // Anzeigelogik
 
-// showTemperature()
-// showHumidity()
-// showError()
-
 #include "weather_ui.h"
 #include <Arduino.h>
 #include <Wire.h>
@@ -26,5 +22,5 @@ void weather_show(float temp, float humidity) {
   display.drawStr(110, 40, "%");
 
   display.sendBuffer();
-
+  
 }
