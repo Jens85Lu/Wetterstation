@@ -1,11 +1,12 @@
 #ifndef APP_STATE_H
 #define APP_STATE_H
 
-enum AppState
-{
-    STARTUP,
-    RUNNING,
-    SENSOR_ERROR
+enum uiScreen {
+  SCREEN_MAIN,
+  SCREEN_MINMAX,
+  SCREEN_GRAPH
 };
 
-#endif
+extern uiScreen currentScreen;
+
+#endif // APP_STATE_H

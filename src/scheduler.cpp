@@ -9,11 +9,15 @@ unsigned long now = 0;
 unsigned long lastDataTime = 0;
 unsigned long lastDisplayTime = 0;
 unsigned long lastBlinkTime = 0;
+unsigned long lastHistoryTime = 0;
 bool ledState = false;
-static bool sensorValid = false;
+bool sensorValid = false;
+int validSamples = 0;
 
 float temp = 0.0f;
 float humidity = 0.0f;
+float tempHistory[64];
+int historyIndex = -1;
 
 void scheduler_run() {
     now = millis();
@@ -23,7 +27,7 @@ void scheduler_run() {
         ledState = !ledState;
         digitalWrite(LED_PIN, ledState);
     }
-    // Temperaturtask
+    // Temperatur Messtask
     
     if (now - lastDataTime >= 2000) {
         lastDataTime = now;
@@ -31,7 +35,21 @@ void scheduler_run() {
         humidity = dht_getHumidity();
         sensorValid = true;
     }
-    // Anzeigetask
+        
+    // Historie aktualisieren Task
+    if (now - lastHistoryTime >= 20000) {
+        lastHistoryTime = now;
+
+        if (validSamples < 64) {
+          validSamples++;
+        }
+        // Historie aktualisieren
+        historyIndex = (historyIndex + 1) % 64;
+
+        tempHistory[historyIndex] = temp;
+    }
+
+    // Anzeige aktualisieren Task
     if (now - lastDisplayTime >= 200) {
         lastDisplayTime = now;
         if (sensorValid) {
