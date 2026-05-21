@@ -3,17 +3,20 @@
 #include "weather_ui.h"
 #include "display.h"
 #include "scheduler.h"
+#include "button.h"
+#define BUTTON_PIN 3
+#define LED_PIN 13
 
 void setup() {
   Serial.begin(115200);
   dht_init();
   display_init();
-  pinMode(13, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
 void loop() {
   
-  scheduler_run();  
-  
+  scheduler_run();
 }
   
