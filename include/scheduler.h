@@ -3,10 +3,12 @@
 
 #include <Arduino.h>
 
-extern float tempHistory[64];
-extern float humidityHistory[64];
+extern float tempHistory[120];
+extern float humidityHistory[120];
 extern int historyIndex;
 extern int validSamples;
+extern float tempStep;
+extern float humidityStep;
 
 void scheduler_run();
 
