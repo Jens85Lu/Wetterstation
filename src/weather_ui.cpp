@@ -51,9 +51,9 @@ static void drawMainScreen(float temp, float humidity){
   dtostrf(temp, 4, 1, tempStr);
   dtostrf(humidity, 4, 1, humidityStr);
   // Temperatur-Trendsymbol bestimmen
-  if (tempStep > 0.2f) {  
+  if (tempStep > 0.037f) {  
     tempTrendSymbol[0] = '^'; // Aufwärtspfeil
-  } else if (tempStep < -0.2f) {
+  } else if (tempStep < -0.037f) {
     tempTrendSymbol[0] = 'v'; // Abwärtspfeil
   } else {
     tempTrendSymbol[0] = '='; // Kein Trend
@@ -61,9 +61,9 @@ static void drawMainScreen(float temp, float humidity){
   tempTrendSymbol[1] = '\0'; // Nullterminator für String
 
   // Luftfeuchtigkeits-Trendsymbol bestimmen
-  if (humidityStep > 0.4f) {
+  if (humidityStep > 0.1f) {
     humidityTrendSymbol[0] = '^'; // Aufwärtspfeil
-  } else if (humidityStep < -0.4f) {
+  } else if (humidityStep < -0.1f) {
     humidityTrendSymbol[0] = 'v'; // Abwärtspfeil
   } else {
     humidityTrendSymbol[0] = '='; // Kein Trend
@@ -107,17 +107,18 @@ static void drawMinMaxScreen() {
     display.drawStr(80, 60, maxHumidityStr);
 }
 
-static void drawGraphScreen() {
-    float graphMin = minTemp;
-    float graphMax = maxTemp;
-      
+static void drawGraphScreen(float temp, float meanTemp) {
+    
+  float graphMin = floor(minTemp);
+    float graphMax = ceil(maxTemp);
+    int vRange = 63 - 14; // Vertikaler Bereich für den Graphen
+
     display.setFont(u8g2_font_ncenB08_tr);
 
     // Mindestrange von 1 Grad sicherstellen
-    float range = graphMax - graphMin;
-    if (range < 1.0f) {
-      graphMin = graphMin - (1.0f - range) / 2.0f;
-      graphMax = graphMax + (1.0f - range) / 2.0f;
+    if (graphMin == graphMax) {
+      graphMin = graphMin - 0.5f;
+      graphMax = graphMax + 0.5f;
     }
     // Es werden zwei Datenpunkte gebraucht, um eine Linie zu zeichnen
     if (validSamples < 2) {
@@ -129,22 +130,85 @@ static void drawGraphScreen() {
       int index = (historyIndex - (i-1) + validSamples) % validSamples; // Ringpuffer-Index
       int prevIndex = (historyIndex - i + validSamples) % validSamples; // Vorheriger Index im Ringpuffer
       
-      int x1 = 128 - i;
-      int x2 = 128 - (i-1);
+      int x1 = 127 - i;
+      int x2 = 127 - (i-1);
       
-      int y1 = 63 - 49*((tempHistory[prevIndex] - graphMin) / (graphMax - graphMin));
-      int y2 = 63 - 49*((tempHistory[index] - graphMin) / (graphMax - graphMin));
+      int y1 = 63 - vRange*((tempHistory[prevIndex] - graphMin) / (graphMax - graphMin));
+      int y2 = 63 - vRange*((tempHistory[index] - graphMin) / (graphMax - graphMin));
 
       display.drawLine(x1,y1,x2,y2);      
     }
     // Achsen zeichnen und Beschriftung hinzufügen
     display.drawLine(0, 14, 0, 63); // Y-Achse
     display.drawLine(0, 63, 127, 63); // X-Achse
-    String header = String(graphMin, 1) + " < Temp(10h) < " + String(graphMax, 1);
-    display.drawStr(0, 12, header.c_str());
+    // Draw ticks on x-axis every 20 pixels
+    for (int x = 10; x < 128; x += 10) {
+      display.drawPixel(x, 62); // Ticks auf der X-Achse
+    }
+    // Draw ticks on y-axis every for half integer temperatures
+    for (int i = 0; i <= floor((graphMax-graphMin)*2); i++) {
+      float t = graphMin + (float)i / 2.0f;
+      int y = 63 - 49*((t - graphMin) / (graphMax - graphMin));
+      display.drawPixel(1, y); // Ticks auf der Y-Achse      
+    }
+    
+    String header = "T: " + String(graphMin, 1) + " - " + String(graphMax, 1)  + "\xB0""C";
+    display.drawStr(10, 12, header.c_str());
+    String currentTempStr = String(temp, 1) + "\xB0""C";
+    display.drawStr(100, 12, currentTempStr.c_str());
   }
 
-void weather_show(float temp, float humidity) {
+  static void drawGraphScreenHum(float hum, float meanHum) {
+    float graphMin = floor(minHumidity);
+    float graphMax = ceil(maxHumidity);
+    int vRange = 63 - 14; // Vertikaler Bereich für den Graphen
+
+    display.setFont(u8g2_font_ncenB08_tr);
+
+    // Mindestrange von 1 Grad sicherstellen
+    if (graphMin == graphMax) {
+      graphMin = graphMin - 0.5f;
+      graphMax = graphMax + 0.5f;
+    }
+    // Es werden zwei Datenpunkte gebraucht, um eine Linie zu zeichnen
+    if (validSamples < 2) {
+      display.drawStr(10, 30, "Collecting data...");
+      return;
+    }
+    // Historie als Graph zeichnen, neueste Daten rechts
+    for (int i = 1; i < validSamples; i++) {
+      int index = (historyIndex - (i-1) + validSamples) % validSamples; // Ringpuffer-Index
+      int prevIndex = (historyIndex - i + validSamples) % validSamples; // Vorheriger Index im Ringpuffer
+      
+      int x1 = 127 - i;
+      int x2 = 127 - (i-1);
+      
+      int y1 = 63 - vRange*((humidityHistory[prevIndex] - graphMin) / (graphMax - graphMin));
+      int y2 = 63 - vRange*((humidityHistory[index] - graphMin) / (graphMax - graphMin));
+
+      display.drawLine(x1,y1,x2,y2);      
+    }
+    // Achsen zeichnen und Beschriftung hinzufügen
+    display.drawLine(0, 14, 0, 63); // Y-Achse
+    display.drawLine(0, 63, 127, 63); // X-Achse
+    // Draw ticks on x-axis every 20 pixels
+    for (int x = 10; x < 128; x += 10) {
+      display.drawPixel(x, 62); // Ticks auf der X-Achse
+    }
+    // Draw ticks on y-axis every for half integer temperatures
+    for (int i = 0; i <= floor((graphMax-graphMin)); i++) {
+      float t = graphMin + (float)i;
+      int y = 63 - 49*((t - graphMin) / (graphMax - graphMin));
+      display.drawPixel(1, y); // Ticks auf der Y-Achse      
+    }
+    
+    String header = "H: " + String(graphMin, 1) + " - " + String(graphMax, 1)  + "%";
+    display.drawStr(10, 12, header.c_str());
+    String currentTempStr = String(hum, 1) + "%";
+    display.drawStr(100, 12, currentTempStr.c_str());
+  }
+
+void weather_show(float temp, float humidity, float meanTemp, float meanHum) {
   display.clearBuffer();
 
   // Min/Max Temperatur bestimmen
@@ -182,8 +246,11 @@ void weather_show(float temp, float humidity) {
     case SCREEN_MINMAX:
         drawMinMaxScreen();
         break;
-    case SCREEN_GRAPH:
-        drawGraphScreen();
+    case SCREEN_GRAPH_TEMP:
+        drawGraphScreen(temp, meanTemp);
+        break;
+    case SCREEN_GRAPH_HUM:
+        drawGraphScreenHum(humidity, meanHum);
         break;
 }
   display.sendBuffer();

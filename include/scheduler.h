@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 
-extern float tempHistory[120];
-extern float humidityHistory[120];
+extern float tempHistory[128];
+extern float humidityHistory[128];
 extern int historyIndex;
 extern int validSamples;
 extern float tempStep;

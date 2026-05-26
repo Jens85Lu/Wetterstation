@@ -3,13 +3,17 @@
 Embedded weather station using:
 - Arduino Mega 2560
 - DHT22
+- BMP280
 - OLED Display (SH1106)
+- Press Button
 - PlatformIO
 
 ## Features
 
-- Temperature measurement
+- Temperature measurement and display
+- Display of Tendency and Min/Max values
 - Humidity measurement
+- Air pressure measurement (BMP280)
 - OLED UI
 - Cooperative scheduler
 - Data logging to SD
@@ -17,10 +21,10 @@ Embedded weather station using:
 ## Hardware
 
 | Component | Connection |
-|---|---|
-| DHT22 | Pin 2 |
-| OLED SDA | SDA |
-| OLED SCL | SCL |
+|...........|------------|
+| DHT22     | Pin 2      |
+| OLED SDA  | SDA        |
+| OLED SCL  | SCL        |
 
 ## Project Structure
 
@@ -31,11 +35,14 @@ lib/
 ## Learning Goals
 
 - Embedded architecture
-- I2C communication
+- I2C/SPI communication
 - Scheduling
 - State machines
 - Sensor integration
 - Data logging
+- Time stamps
+- EEPROM
+- ESP32 + WLAN + Webdashboard
 
 ## Scheduler
 
@@ -44,5 +51,8 @@ based on millis() timing.
 
 Tasks:
 - Sensor update every 2 seconds
+- Tendency display and Min/Max values
 - Display refresh every 200 ms
-- LED heartbeat every 500 ms
+- LED heartbeat every 500 ms (conditional activation, warning)
+- History and history plot every 6 min
+
