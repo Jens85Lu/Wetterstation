@@ -1,5 +1,5 @@
 #include "app_state.h"
 
-//AppData app;
+AppData app = {};
 
 uiScreen currentScreen = SCREEN_MAIN;

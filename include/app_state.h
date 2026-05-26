@@ -8,35 +8,37 @@ enum uiScreen {
   SCREEN_GRAPH_HUM
 };
 
-extern uiScreen currentScreen;
-//extern AppData app;
-
-#endif // APP_STATE_H
-
-/* struct AppData
+struct AppData
 {
     // Sensordaten
     float temp;
     float humidity;
 
-    // Mittelwerte für history
-    float meanTemp;
-    float meanHumidity;
+    float minTemp;
+    float maxTemp;
+    float minHumidity;
+    float maxHumidity;
 
-    // Trends
-    float tempStep;
-    float humidityStep;
+    /* // Trends
+    float tempStep; // Difference of mean after 10 measurements
+    float humidityStep; */
 
     // Historie
     float tempHistory[128];
     float humidityHistory[128];
-
     int historyIndex;
     int validSamples;
+    // Mittelwerte für history
+    float meanTemp;
+    float meanHumidity;
 
     // UI
     uiScreen currentScreen;
 
+};
+
+extern uiScreen currentScreen;
 
 
-}; */
+#endif // APP_STATE_H
+
