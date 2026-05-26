@@ -8,13 +8,18 @@ enum uiScreen {
   SCREEN_GRAPH_HUM
 };
 
-struct AppData
+extern uiScreen currentScreen;
+//extern AppData app;
+
+#endif // APP_STATE_H
+
+/* struct AppData
 {
     // Sensordaten
     float temp;
     float humidity;
 
-    // Mittelwerte
+    // Mittelwerte für history
     float meanTemp;
     float meanHumidity;
 
@@ -32,11 +37,6 @@ struct AppData
     // UI
     uiScreen currentScreen;
 
-    // Status
-    bool sensorValid;
-};
 
-extern uiScreen currentScreen;
-extern AppData app;
 
-#endif // APP_STATE_H
+}; */
