@@ -37,6 +37,8 @@ struct AppData
 
 };
 
+extern AppData app;
+
 extern uiScreen currentScreen;
 
 
