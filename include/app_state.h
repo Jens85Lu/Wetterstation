@@ -14,15 +14,15 @@ struct AppData
     float temp;
     float humidity;
 
-    float minTemp;
-    float maxTemp;
-    float minHumidity;
-    float maxHumidity;
+    float minTemp = 999.0f;
+    float maxTemp = -999.0f ;
+    float minHumidity = 999.0f;
+    float maxHumidity = -999.0f;
 
     // Historie
     float tempHistory[128];
     float humidityHistory[128];
-    int historyIndex;
+    int historyIndex = -1;
     int validSamples;
 
     /* // Mittelwerte für history
@@ -33,7 +33,8 @@ struct AppData
     float tempStep; // Difference of mean after 10 measurements
     float humidityStep;
 
-    bool sensorValid;    
+    bool sensorValid = false;   
+    bool ledState; 
 
     // UI
     uiScreen currentScreen;
