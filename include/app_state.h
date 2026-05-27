@@ -37,13 +37,11 @@ struct AppData
     bool ledState; 
 
     // UI
-    uiScreen currentScreen;
+    uiScreen currentScreen = SCREEN_MAIN;
 
 };
 
 extern AppData app;
-
-extern uiScreen currentScreen;
 
 
 #endif // APP_STATE_H

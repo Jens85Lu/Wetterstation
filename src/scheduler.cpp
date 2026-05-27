@@ -79,7 +79,35 @@ void scheduler_run() {
         sumTemp = 0.0f;
         sumHum = 0.0f;
         m = 0;
+    
+    // Min/Max Temperatur bestimmen
+    app.minTemp = app.tempHistory[0];
+    app.maxTemp = app.tempHistory[0];
+    for (int i = 1; i < app.validSamples; ++i) {
+      if (app.tempHistory[i] < app.minTemp) {
+        app.minTemp = app.tempHistory[i];
+      }
     }
+    for (int i = 1; i < app.validSamples; ++i) {
+      if (app.tempHistory[i] > app.maxTemp) {
+        app.maxTemp = app.tempHistory[i];
+      }
+    }
+    // Min/Max Luftfeuchtigkeit bestimmen
+    app.minHumidity = app.humidityHistory[0];
+    app.maxHumidity = app.humidityHistory[0];
+    for (int i = 1; i < app.validSamples; ++i) {
+      if (app.humidityHistory[i] < app.minHumidity) {
+        app.minHumidity = app.humidityHistory[i];
+      }
+    }
+    for (int i = 1; i < app.validSamples; ++i) {
+      if (app.humidityHistory[i] > app.maxHumidity) {
+        app.maxHumidity = app.humidityHistory[i];
+      }
+    }
+
+  }
 }
 
     // Anzeige aktualisieren Task
@@ -93,15 +121,15 @@ void scheduler_run() {
     // Button
     if (button_wasPressed()) {
         lastButtonTime = now;
-        currentScreen = (uiScreen)(currentScreen + 1);
-        if (currentScreen > SCREEN_GRAPH_HUM) {
-            currentScreen = SCREEN_MAIN;
+        app.currentScreen = (uiScreen)(app.currentScreen + 1);
+        if (app.currentScreen > SCREEN_GRAPH_HUM) {
+            app.currentScreen = SCREEN_MAIN;
         }
     }
 
     // Automatischer Rücksprung zum Hauptbildschirm nach 5 Minuten Inaktivität
-    if (currentScreen != SCREEN_MAIN && now - lastButtonTime >= 300000) { // 5 Minute Inaktivität
-        currentScreen = SCREEN_MAIN; // Zurück zum Hauptbildschirm wechseln
+    if (app.currentScreen != SCREEN_MAIN && now - lastButtonTime >= 300000) { // 5 Minute Inaktivität
+        app.currentScreen = SCREEN_MAIN; // Zurück zum Hauptbildschirm wechseln
     }
         
 }
