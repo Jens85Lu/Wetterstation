@@ -38,7 +38,7 @@ void scheduler_run() {
     if (now - lastBlinkTime >= 500) {
         lastBlinkTime = now;
         ledState = !ledState;
-        if (humidity < 64.0f) {
+        if (app.humidity < 64.0f) {
           ledState = false; // LED aus, wenn Luftfeuchtigkeit unter 60%
         }
         digitalWrite(LED_PIN, ledState);
@@ -50,17 +50,17 @@ void scheduler_run() {
         static float hum_bar = 0.0f;
         static int n = 1; // Für die Trendberechnung alle 30 Messungen
         lastDataTime = now;
-        temp = dht_getTemperature();
+        app.temp = dht_getTemperature();
         static float prevTemp_bar = 0; // Für Tendenzberechnung
         static float prevHum_bar = 0;
-        humidity = dht_getHumidity();
-        sensorValid = true;
+        app.humidity = dht_getHumidity();
+        app.sensorValid = true;
 
-        sumTemp += temp; // Mean value for history
-        sumHum += humidity;
+        sumTemp += app.temp; // For mean value calculation (History)
+        sumHum += app.humidity;
 
-        temp_bar = (n-1)/((float)n) * temp_bar + 1/((float)n) * temp;
-        hum_bar = (n-1)/((float)n) * hum_bar + 1/((float)n) * humidity;
+        temp_bar = (n-1)/((float)n) * temp_bar + 1/((float)n) * app.temp;
+        hum_bar = (n-1)/((float)n) * hum_bar + 1/((float)n) * app.humidity;
         n++;
         if (n % 30 == 0) {
             n = 1;
@@ -77,25 +77,24 @@ void scheduler_run() {
     if (now - lastHistoryTime >= historyTime) {
         lastHistoryTime = now;
 
-        if (validSamples < 128) {
-          validSamples++;
+        if (app.validSamples < 128) {
+          app.validSamples++;
         }
         meanTemp = sumTemp / (float)N;
         meanHum = sumHum /(float)N;
         sumTemp = sumHum = 0.0f;
         
         // Historie aktualisieren
-        historyIndex = (historyIndex + 1) % 128;
-        tempHistory[historyIndex] = meanTemp; // History bekommt Mittelwert der Temperatur
-
-        humidityHistory[historyIndex] = meanHum;
+        app.historyIndex = (app.historyIndex + 1) % 128;
+        app.tempHistory[app.historyIndex] = meanTemp; // History bekommt Mittelwert der Temperatur
+        app.humidityHistory[app.historyIndex] = meanHum;
     }
 
     // Anzeige aktualisieren Task
     if (now - lastDisplayTime >= 200) {
         lastDisplayTime = now;
-        if (sensorValid) {
-            weather_show(temp, humidity, meanTemp, meanHum);
+        if (app.sensorValid) {
+            weather_show(app.temp, app.humidity, meanTemp, meanHum);
         }
     } 
 
