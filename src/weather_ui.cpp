@@ -46,25 +46,7 @@ static void drawMainScreen(AppData& data){
   display.setFont(u8g2_font_crox4hb_tf);
   dtostrf(data.temp, 4, 1, tempStr);
   dtostrf(data.humidity, 4, 1, humidityStr);
-  // Temperatur-Trendsymbol bestimmen
-  if (data.tempStep > 0.037f) {  
-    tempTrendSymbol[0] = '^'; // Aufwärtspfeil
-  } else if (data.tempStep < -0.037f) {
-    tempTrendSymbol[0] = 'v'; // Abwärtspfeil
-  } else {
-    tempTrendSymbol[0] = '='; // Kein Trend
-  }
-  tempTrendSymbol[1] = '\0'; // Nullterminator für String
-
-  // Luftfeuchtigkeits-Trendsymbol bestimmen
-  if (data.humidityStep > 0.1f) {
-    humidityTrendSymbol[0] = '^'; // Aufwärtspfeil
-  } else if (data.humidityStep < -0.1f) {
-    humidityTrendSymbol[0] = 'v'; // Abwärtspfeil
-  } else {
-    humidityTrendSymbol[0] = '='; // Kein Trend
-  }
-  humidityTrendSymbol[1] = '\0'; // Nullterminator für String
+  
   display.drawStr(x, y + 20, "T: ");
   display.drawStr(50, y + 20, tempStr);
   display.drawStr(90, y + 20, "\xB0""C"); // Gradzeichen

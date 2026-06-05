@@ -29,10 +29,6 @@ struct AppData
     float meanTemp;
     float meanHumidity; */
 
-    // Trends
-    float tempStep; // Difference of mean after 10 measurements
-    float humidityStep;
-
     bool sensorValid = false;   
     bool ledState; 
 
