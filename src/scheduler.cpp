@@ -1,6 +1,7 @@
 #include "scheduler.h"
 
 #include "dht_sensor.h"
+#include "bmp280.h"
 #include "weather_ui.h"
 #include "button.h"
 #include "app_state.h"
@@ -8,11 +9,12 @@
 
 unsigned long now = 0;
 unsigned long lastDataTime = 0;
+unsigned long lastBMP280Time = 0;
 unsigned long lastDisplayTime = 0;
 unsigned long lastBlinkTime = 0;
 unsigned long lastButtonTime = 0;
 const unsigned long measurementTime = 2000; // Alle 2 Sekunden messen (in ms)
-const int N = 6; // (= 180) Anzahl der Messungen pro Historie-Update
+const int N = 6; // (= 180) Anzahl der Messungen für Historie Mittelung
 static float sumTemp = 0.0f; // Summe der Temperaturen für History Mittelwertberechnung 
 static float sumHum = 0.0f; // Summe der Luftfeuchtigkeit für History Mittelwertberechnung 
 static int historyCounter = 0; // Counter für die History
@@ -41,6 +43,25 @@ static void updateSensor() {
         historyCounter++;
         sumTemp += app.temp; // For mean value calculation (History)
         sumHum += app.humidity; // For mean value calculation (History)
+    }
+};
+
+static void updateBMP280() {
+  // BMP280 Druckmessung, alle 10 Sekunden
+    if (now - lastBMP280Time >= 10000) {
+        lastBMP280Time = now;
+        float pressure = bmp280_getPressure();
+        Serial.print("Pressure: ");
+        Serial.print(pressure);
+        Serial.println(" hPa");
+        float temperature = bmp280_getTemperature();
+        Serial.print(F("Temperature = "));
+        Serial.print(temperature);
+        Serial.println(" *C");
+        float altitude = bmp280_getAltitude();
+        Serial.print(F("Approx altitude = "));
+        Serial.print(altitude);
+        Serial.println(" m");
     }
 };
 
@@ -129,6 +150,7 @@ void scheduler_run() {
 
     updateLed();
     updateSensor();
+    updateBMP280();
     updateHistory();
     updateDisplay();
     updateButton();

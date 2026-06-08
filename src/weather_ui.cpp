@@ -114,7 +114,7 @@ static void drawGraphScreen(AppData& data) {
     display.drawLine(0, 63, 127, 63); // X-Achse
     // Draw ticks on x-axis every 20 pixels
     for (int x = 10; x < 128; x += 10) {
-      display.drawPixel(x, 62); // Ticks auf der X-Achse
+      display.drawPixel(x, 62); // Ticks auf der X-Achse, 10 pixel à 6 minutes = 60 minutes
     }
     // Draw ticks on y-axis every for half integer temperatures
     for (int i = 0; i <= floor((graphMax-graphMin)*2); i++) {

@@ -6,6 +6,6 @@ void dht_init();
 
 float dht_getTemperature();
 
-float dht_getHumidity();
+float dht_getHumidity(); 
 
 #endif

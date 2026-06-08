@@ -11,7 +11,7 @@ Embedded weather station using:
 ## Features
 
 - Temperature measurement and display
-- Display of Tendency and Min/Max values
+- Display Min/Max values
 - Humidity measurement
 - Air pressure measurement (BMP280)
 - OLED UI
@@ -51,8 +51,8 @@ based on millis() timing.
 
 Tasks:
 - Sensor update every 2 seconds
-- Tendency display and Min/Max values
+- Display of Min/Max values
 - Display refresh every 200 ms
-- LED heartbeat every 500 ms (conditional activation, warning)
-- History and history plot every 6 min
+- LED heartbeat every 500 ms (conditional activation, warning of high humidity)
+- History with history plot frequency every 6 min -> 12 h window on display
 
