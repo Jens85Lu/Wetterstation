@@ -25,7 +25,7 @@ struct AppData
     int historyIndex = -1;
     int validSamples;
 
-    /* // Mittelwerte für history
+    /* // Mittelwerte für history vielleicht später mal nötig
     float meanTemp;
     float meanHumidity; */
 

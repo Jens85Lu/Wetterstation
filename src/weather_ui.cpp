@@ -3,18 +3,13 @@
 #include "weather_ui.h"
 #include "display.h"
 #include <Arduino.h>
-//#include <Wire.h>
-//#include <U8g2lib.h>
 #include "app_state.h"
-//#include "scheduler.h"
 
 // For Screensaver animation
 static bool lastEdge = false; 
 static int x = 0; // movement in x direction
 static int y = 0; // movement in y direction
-// Trendsymbole
-static char tempTrendSymbol[2];
-static char humidityTrendSymbol[2];
+
 
 static void makeAnimation() {
   // Einfache Animation: Text bewegt sich von rechts nach links und zurück
@@ -50,11 +45,9 @@ static void drawMainScreen(AppData& data){
   display.drawStr(x, y + 20, "T: ");
   display.drawStr(50, y + 20, tempStr);
   display.drawStr(90, y + 20, "\xB0""C"); // Gradzeichen
-  display.drawStr(110, y + 20, tempTrendSymbol);
   display.drawStr(x, y + 40, "H: ");
   display.drawStr(50, y + 40, humidityStr);
   display.drawStr(90, y + 40, "%");
-  display.drawStr(110, y + 40, humidityTrendSymbol);
   
   makeAnimation();
 }
