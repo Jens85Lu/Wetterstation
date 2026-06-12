@@ -79,6 +79,7 @@ platformio.ini
 
 - SD card logging
 - ESP32 web dashboard
+- Sensor calibration layer
 
 
 
