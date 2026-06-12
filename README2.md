@@ -48,11 +48,12 @@ Embedded weather station project using Arduino Mega 2560 and multiple sensors fo
 ---
 
 ## 📁 Project Structure
-
+```
 src/
 include/
 lib/
 platformio.ini
+```
 
 ## 🎯 Learning Goals
 
