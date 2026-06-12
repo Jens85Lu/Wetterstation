@@ -40,7 +40,7 @@ Embedded weather station project using Arduino Mega 2560 and multiple sensors fo
 | BMP280   | SCL    | SCL (21)    |
 | OLED     | SDA    | SDA (20)    |
 | OLED     | SCL    | SCL (21)    |
-| Button   | Signal | 7           |
+| Button   | Signal | 3           |
 | LED      | Output | 13          |
 
 > Note: SDA/SCL are shared via I2C bus
@@ -48,11 +48,12 @@ Embedded weather station project using Arduino Mega 2560 and multiple sensors fo
 ---
 
 ## 📁 Project Structure
-
+```
 src/
 include/
 lib/
 platformio.ini
+```
 
 ## 🎯 Learning Goals
 
@@ -78,6 +79,7 @@ platformio.ini
 
 - SD card logging
 - ESP32 web dashboard
+- Sensor calibration layer
 
 
 
