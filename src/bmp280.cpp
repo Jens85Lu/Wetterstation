@@ -17,6 +17,10 @@ float bmp280_getPressure() {
     return bmp.readPressure() / 100.0f;
 }
 
+float seaLevelPressure(float pressure, float altitude) {
+    return pressure / pow(1.0f - (altitude / 44330.0f), 5.255f);
+}
+
 float bmp280_getTemperature() {
     
     return bmp.readTemperature();

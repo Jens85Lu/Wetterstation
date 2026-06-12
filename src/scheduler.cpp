@@ -6,6 +6,7 @@
 #include "button.h"
 #include "app_state.h"
 #define LED_PIN 13
+#define N 180 // Anzahl der Messungen für Historie Mittelung
 
 unsigned long now = 0;
 unsigned long lastDataTime = 0;
@@ -14,9 +15,10 @@ unsigned long lastDisplayTime = 0;
 unsigned long lastBlinkTime = 0;
 unsigned long lastButtonTime = 0;
 const unsigned long measurementTime = 2000; // Alle 2 Sekunden messen (in ms)
-const int N = 6; // (= 180) Anzahl der Messungen für Historie Mittelung
+//const int N = 6; // (= 180) Anzahl der Messungen für Historie Mittelung
 static float sumTemp = 0.0f; // Summe der Temperaturen für History Mittelwertberechnung 
 static float sumHum = 0.0f; // Summe der Luftfeuchtigkeit für History Mittelwertberechnung 
+static float sumPressure = 0.0f; // Summe des Luftdrucks für History Mittelwertberechnung
 static int historyCounter = 0; // Counter für die History
 
 static void updateLed() {
@@ -33,36 +35,16 @@ static void updateLed() {
 
 static void updateSensor() {
   // Temperatur Messtask
-    
-    if (now - lastDataTime >= measurementTime) {
-        
-        lastDataTime = now;
-        app.temp = dht_getTemperature();
-        app.humidity = dht_getHumidity();
-        app.sensorValid = true;
-        historyCounter++;
-        sumTemp += app.temp; // For mean value calculation (History)
-        sumHum += app.humidity; // For mean value calculation (History)
-    }
-};
-
-static void updateBMP280() {
-  // BMP280 Druckmessung, alle 10 Sekunden
-    if (now - lastBMP280Time >= 10000) {
-        lastBMP280Time = now;
-        float pressure = bmp280_getPressure();
-        Serial.print("Pressure: ");
-        Serial.print(pressure);
-        Serial.println(" hPa");
-        float temperature = bmp280_getTemperature();
-        Serial.print(F("Temperature = "));
-        Serial.print(temperature);
-        Serial.println(" *C");
-        float altitude = bmp280_getAltitude();
-        Serial.print(F("Approx altitude = "));
-        Serial.print(altitude);
-        Serial.println(" m");
-    }
+    app.temp = dht_getTemperature();
+    app.humidity = dht_getHumidity();
+    app.pressure = bmp280_getPressure(); // Absolute Pressure in hPa
+    app.pressure_seaLevel = seaLevelPressure(app.pressure, 248.0f); // Conversion to sea level pressure, da die Höhe der Sensoren über dem Meeresspiegel liegt
+    app.bmpTemperature = bmp280_getTemperature();
+    app.sensorValid = true;
+    historyCounter++;
+    sumTemp += app.temp; // For mean value calculation (History)
+    sumHum += app.humidity; // For mean value calculation (History)
+    sumPressure += app.pressure_seaLevel;
 };
 
 static void updateMinMax() {
@@ -94,6 +76,41 @@ static void updateMinMax() {
       app.maxHumidity = app.humidityHistory[i];
     };
   };
+  // Min/Max Pressure bestimmen
+  app.minPressure = app.pressureHistory[0];
+  app.maxPressure = app.pressureHistory[0];
+  
+  for (int i = 1; i < app.validSamples; ++i) {
+    if (app.pressureHistory[i] < app.minPressure) {
+      app.minPressure = app.pressureHistory[i];
+    };
+  };
+  for (int i = 1; i < app.validSamples; ++i) {
+    if (app.pressureHistory[i] > app.maxPressure) {
+      app.maxPressure = app.pressureHistory[i];
+    };
+  };
+};
+
+static void determineWeatherTendency() {
+  // Wettertendenz bestimmen, wenn mindestens 30 gültige Messungen vorliegen
+  if (app.validSamples >= 30) {
+    int index30 = (app.historyIndex - 30 + 128) % 128; // Index für den Wert von vor 30 Messungen
+    if (app.pressureHistory[app.historyIndex] > app.pressureHistory[index30] + 1.0f) {
+      app.weatherTendency = 2; // Stark steigend
+    } else if (app.pressureHistory[app.historyIndex] > app.pressureHistory[index30] + 0.5f) {
+      app.weatherTendency = 1; // Steigend
+    } else if (app.pressureHistory[app.historyIndex] < app.pressureHistory[index30] - 0.5f) {
+      app.weatherTendency = -1; // Fallend
+    } else if (app.pressureHistory[app.historyIndex] < app.pressureHistory[index30] - 1.0f) {
+      app.weatherTendency = -2; // Stark fallend
+    } else {
+      app.weatherTendency = 0; // Stabil
+    }
+  }
+  else {
+    app.weatherTendency = 0; // Stabil, wenn nicht genügend Daten für Tendenzbestimmung vorliegen
+  }
 };
 
 static void updateHistory() {
@@ -108,25 +125,26 @@ static void updateHistory() {
       // Historie aktualisieren
       app.historyIndex = (app.historyIndex + 1) % 128;
       
-      app.tempHistory[app.historyIndex] = sumTemp / (float)historyCounter; // History bekommt Mittelwert der Temperatur
+      app.tempHistory[app.historyIndex] = sumTemp / (float)historyCounter; // History bekommt Mittelwert der letzten N Messungen
       app.humidityHistory[app.historyIndex] = sumHum /(float)historyCounter;
+      app.pressureHistory[app.historyIndex] = sumPressure / (float)historyCounter;
+      determineWeatherTendency();
+
       sumTemp = 0.0f;
       sumHum = 0.0f;
+      sumPressure = 0.0f;
       historyCounter = 0;
       
-      // Update Min/Max values from history
+      // Update Min/Max values if history was updated
       updateMinMax();
     };
 };
 
 static void updateDisplay() {
   // Display aktualisieren
-  if (now - lastDisplayTime >= 200) {
-        lastDisplayTime = now;
-        if (app.sensorValid) {
-            weather_show(app);
-        }
-    } 
+  if (app.sensorValid) {
+      weather_show(app);
+  }
 };
 
 static void updateButton() {
@@ -134,7 +152,7 @@ static void updateButton() {
   if (button_wasPressed()) {
         lastButtonTime = now;
         app.currentScreen = (uiScreen)(app.currentScreen + 1);
-        if (app.currentScreen > SCREEN_GRAPH_HUM) {
+        if (app.currentScreen > SCREEN_TENDENCY) {
             app.currentScreen = SCREEN_MAIN;
         }
     }
@@ -146,13 +164,22 @@ static void updateButton() {
 };
 
 void scheduler_run() {
-    now = millis();
+  now = millis();
 
-    updateLed();
-    updateSensor();
-    updateBMP280();
-    updateHistory();
-    updateDisplay();
-    updateButton();
-        
+  if(now -lastDataTime >= measurementTime) {
+      lastDataTime = now;
+
+      updateSensor();
+      updateHistory();
+  }
+    
+    
+  if (now - lastDisplayTime >= 200) {
+        lastDisplayTime = now;
+
+        updateDisplay();
+  }
+  
+  updateButton();
+  updateLed();      
 }
