@@ -1,58 +1,84 @@
-# Weather Station
+# 🌦️ Weather Station
 
-Embedded weather station using:
+Embedded weather station project using Arduino Mega 2560 and multiple sensors for environmental monitoring.
+
+---
+
+## 🔧 Hardware
+
 - Arduino Mega 2560
-- DHT22
-- BMP280
-- OLED Display (SH1106)
-- Press Button
-- PlatformIO
+- DHT22 (Temperature & Humidity)
+- BMP280 (Air Pressure)
+- SH1106 OLED Display (I2C)
+- Push Button
+- PlatformIO (VSCode)
 
-## Features
+---
 
-- Temperature measurement and display
-- Display Min/Max values
-- Humidity measurement
+## ✨ Features
+
+- Temperature & humidity measurement (DHT22)
 - Air pressure measurement (BMP280)
-- OLED UI
-- Cooperative scheduler
-- Data logging to SD
+- OLED display with UI screens
+- Min / Max tracking
+- Historical data logging
+- Graph visualization (temperature & humidity)
+- Cooperative scheduler (non-blocking millis timing)
+- Button-based screen navigation
+- LED status indicator
 
-## Hardware
+---
 
-| Component | Connection |
-|...........|------------|
-| DHT22     | Pin 2      |
-| OLED SDA  | SDA        |
-| OLED SCL  | SCL        |
+## 📊 Wiring
 
-## Project Structure
+### Arduino Mega 2560 Connections
+
+| Component | Signal | Arduino Pin |
+|----------|--------|-------------|
+| DHT22    | Data   | 2           |
+| BMP280   | SDA    | SDA (20)    |
+| BMP280   | SCL    | SCL (21)    |
+| OLED     | SDA    | SDA (20)    |
+| OLED     | SCL    | SCL (21)    |
+| Button   | Signal | 7           |
+| LED      | Output | 13          |
+
+> Note: SDA/SCL are shared via I2C bus
+
+---
+
+## 📁 Project Structure
 
 src/
 include/
 lib/
+platformio.ini
 
-## Learning Goals
+## 🎯 Learning Goals
 
-- Embedded architecture
-- I2C/SPI communication
-- Scheduling
-- State machines
-- Sensor integration
-- Data logging
-- Time stamps
-- EEPROM
-- ESP32 + WLAN + Webdashboard
+- Embedded system architecture
+- Sensor integration (I2C / digital)
+- Non-blocking scheduler design
+- State machine UI design
+- Ring buffer data handling
+- Embedded graph rendering
+- Modular C++ design
 
-## Scheduler
+---
 
-The application uses a cooperative scheduler
-based on millis() timing.
+## ⏱️ Scheduler
 
-Tasks:
-- Sensor update every 2 seconds
-- Display of Min/Max values
-- Display refresh every 200 ms
-- LED heartbeat every 500 ms (conditional activation, warning of high humidity)
-- History with history plot frequency every 6 min -> 12 h window on display
+- Sensor update: 2s
+- Display update: 200ms
+- LED blink: 500ms
+- History update: ~6 min intervals
+
+
+## 📌 Future
+
+- SD card logging
+- ESP32 web dashboard
+
+
+
 
